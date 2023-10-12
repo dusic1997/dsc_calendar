@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 // import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:sliver_tools/sliver_tools.dart';
@@ -81,94 +83,162 @@ class _DscCalendarState extends State<DscCalendar> {
                       Text('周${['一', '二', '三', '四', '五', '六', '日'][index]}')))),
         )),
         SliverList(
-            delegate: SliverChildBuilderDelegate(((context, index) {
-          var day = DateTime(
-              widget.beginDate.year, widget.beginDate.month + index, 1);
-          var actualDays =
-              DateTime(day.year, day.month + 1, day.day).difference(day).inDays;
-          var beginWeekDayIndex = day.weekday - 1;
-          var endDateOffsetToSunDay = 7 -
-              DateTime(day.year, day.month + 1, day.day)
-                  .add(Duration(days: -1))
-                  .weekday;
+          delegate: SliverChildBuilderDelegate(((context, index) {
+            var day = DateTime(
+                widget.beginDate.year, widget.beginDate.month + index, 1);
+            var actualDays = DateTime(day.year, day.month + 1, day.day)
+                .difference(day)
+                .inDays;
+            var beginWeekDayIndex = day.weekday - 1;
+            var endDateOffsetToSunDay = 7 -
+                DateTime(day.year, day.month + 1, day.day)
+                    .add(Duration(days: -1))
+                    .weekday;
 
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                alignment: Alignment.centerLeft,
-                color: Colors.grey[200],
-                height: 30,
-                width: 999,
-                child: Text(
-                  '   ${day.year}年${day.month}月',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              SizedBox(
-                // height: 300,
-                child: GridView.builder(
-                  physics: NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 7,
+            var count = endDateOffsetToSunDay + beginWeekDayIndex > 7 &&
+                    DateTime(day.year, day.month + 1, day.day).weekday != 1
+                ? 42
+                : 35;
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  alignment: Alignment.centerLeft,
+                  color: Colors.grey[200],
+                  height: 30,
+                  width: 999,
+                  child: Text(
+                    '   ${day.year}年${day.month}月',
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  itemCount: endDateOffsetToSunDay + beginWeekDayIndex > 7 &&
-                          DateTime(day.year, day.month + 1, day.day).weekday !=
-                              1
-                      ? 42
-                      : 35,
-                  itemBuilder: (BuildContext context, int index) {
-                    if (index < beginWeekDayIndex) {
-                      return SizedBox();
-                    }
-                    var daysOffset = index - beginWeekDayIndex;
-                    if (daysOffset >= actualDays) {
-                      return SizedBox();
-                    }
-                    var dayI = day.add(Duration(days: daysOffset));
-
-                    var disabled = dayI.isAfter(widget.endDate) ||
-                        dayI.isBefore(widget.beginDate);
-                    var isSameDate = dayI.year == daySelected?.year &&
-                        dayI.month == daySelected?.month &&
-                        dayI.day == daySelected?.day;
-                    return IconButton(
-                      onPressed: disabled
-                          ? null
-                          : () {
-                              widget.onDateSelected(dayI);
-                              setState(() {
-                                daySelected = dayI;
-                              });
-                            },
-                      icon: Column(
-                        children: [
-                          Text(
-                            '${dayI.day}',
-                            style: isSameDate && widget.daySelectedStyle != null
-                                ? widget.daySelectedStyle
-                                : TextStyle(
-                                    fontSize: isSameDate ? 17 : null,
-                                    fontWeight: FontWeight.bold,
-                                    color: disabled
-                                        ? Colors.grey
-                                        : isSameDate
-                                            ? Colors.blue
-                                            : [6, 7].contains(dayI.weekday)
-                                                ? Colors.red
-                                                : null),
-                          ),
-                          widget.bottomLabelBuilder?.call(dayI) ?? SizedBox()
-                        ],
-                      ),
-                    );
-                  },
                 ),
-              ),
-            ],
-          );
-        }), childCount: (2099 - widget.beginDate.year) * 12))
+                // if (false)
+                //   Wrap(
+                //     alignment: WrapAlignment.spaceBetween,
+                //     runSpacing: 10,
+                //     children: [
+                //       ...List.generate(
+                //           endDateOffsetToSunDay + beginWeekDayIndex > 7 &&
+                //                   DateTime(day.year, day.month + 1, day.day)
+                //                           .weekday !=
+                //                       1
+                //               ? 42
+                //               : 35, (int index) {
+                //         if (index < beginWeekDayIndex) {
+                //           return SizedBox();
+                //         }
+                //         var daysOffset = index - beginWeekDayIndex;
+                //         if (daysOffset >= actualDays) {
+                //           return SizedBox();
+                //         }
+                //         var dayI = day.add(Duration(days: daysOffset));
+
+                //         var disabled = dayI.isAfter(widget.endDate) ||
+                //             dayI.isBefore(widget.beginDate);
+                //         var isSameDate = dayI.year == daySelected?.year &&
+                //             dayI.month == daySelected?.month &&
+                //             dayI.day == daySelected?.day;
+                //         return IconButton(
+                //           onPressed: disabled
+                //               ? null
+                //               : () {
+                //                   widget.onDateSelected(dayI);
+                //                   setState(() {
+                //                     daySelected = dayI;
+                //                   });
+                //                 },
+                //           icon: Column(
+                //             children: [
+                //               Text(
+                //                 '${dayI.day}',
+                //                 style: isSameDate &&
+                //                         widget.daySelectedStyle != null
+                //                     ? widget.daySelectedStyle
+                //                     : TextStyle(
+                //                         fontSize: isSameDate ? 17 : null,
+                //                         fontWeight: FontWeight.bold,
+                //                         color: disabled
+                //                             ? Colors.grey
+                //                             : isSameDate
+                //                                 ? Colors.blue
+                //                                 : [6, 7].contains(dayI.weekday)
+                //                                     ? Colors.red
+                //                                     : null),
+                //               ),
+                //               widget.bottomLabelBuilder?.call(dayI) ?? SizedBox()
+                //             ],
+                //           ),
+                //         );
+                //       })
+                //     ],
+                //   ),
+
+                SizedBox(
+                  height: 300 / 42 * count,
+                  child: GridView.builder(
+                    physics: NeverScrollableScrollPhysics(),
+                    // shrinkWrap: true,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 7,
+                    ),
+                    itemCount: count,
+                    itemBuilder: (BuildContext context, int index) {
+                      if (index < beginWeekDayIndex) {
+                        return SizedBox();
+                      }
+                      var daysOffset = index - beginWeekDayIndex;
+                      if (daysOffset >= actualDays) {
+                        return SizedBox();
+                      }
+                      var dayI = day.add(Duration(days: daysOffset));
+
+                      var disabled = dayI.isAfter(widget.endDate) ||
+                          dayI.isBefore(widget.beginDate);
+                      var isSameDate = dayI.year == daySelected?.year &&
+                          dayI.month == daySelected?.month &&
+                          dayI.day == daySelected?.day;
+                      return IconButton(
+                        onPressed: disabled
+                            ? null
+                            : () {
+                                widget.onDateSelected(dayI);
+                                setState(() {
+                                  daySelected = dayI;
+                                });
+                              },
+                        icon: Column(
+                          children: [
+                            Text(
+                              '${dayI.day}',
+                              style: isSameDate &&
+                                      widget.daySelectedStyle != null
+                                  ? widget.daySelectedStyle
+                                  : TextStyle(
+                                      fontSize: isSameDate ? 17 : null,
+                                      fontWeight: FontWeight.bold,
+                                      color: disabled
+                                          ? Colors.grey
+                                          : isSameDate
+                                              ? Colors.blue
+                                              : [6, 7].contains(dayI.weekday)
+                                                  ? Colors.red
+                                                  : null),
+                            ),
+                            widget.bottomLabelBuilder?.call(dayI) ?? SizedBox()
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            );
+          }),
+              childCount:
+                  (max(1, widget.endDate.year - widget.beginDate.year)) * 12,
+              addAutomaticKeepAlives: true),
+        )
       ],
     );
   }
