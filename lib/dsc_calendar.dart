@@ -207,26 +207,44 @@ class _DscCalendarState extends State<DscCalendar> {
                                   daySelected = dayI;
                                 });
                               },
-                        icon: Column(
-                          children: [
-                            Text(
-                              '${dayI.day}',
-                              style: isSameDate &&
-                                      widget.daySelectedStyle != null
-                                  ? widget.daySelectedStyle
-                                  : TextStyle(
-                                      fontSize: isSameDate ? 17 : null,
-                                      fontWeight: FontWeight.bold,
-                                      color: disabled
-                                          ? Colors.grey
-                                          : isSameDate
-                                              ? Colors.blue
-                                              : [6, 7].contains(dayI.weekday)
-                                                  ? Colors.red
-                                                  : null),
+                        icon: Container(
+                          padding: const EdgeInsets.all(3.0),
+                          decoration: BoxDecoration(
+                              border: Border.all(
+                                  color: isSameDate
+                                      ? Theme.of(context).primaryColor
+                                      : Colors.transparent),
+                              borderRadius: BorderRadius.circular(9999)),
+                          child: AspectRatio(
+                            aspectRatio: 1,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  '${dayI.day}',
+                                  style: isSameDate &&
+                                          widget.daySelectedStyle != null
+                                      ? widget.daySelectedStyle
+                                      : TextStyle(
+                                          fontSize: isSameDate ? 17 : null,
+                                          fontWeight: FontWeight.bold,
+                                          color: disabled
+                                              ? Colors.grey
+                                              : isSameDate
+                                                  ? Theme.of(context)
+                                                      .primaryColor
+                                                  : [
+                                                      6,
+                                                      7
+                                                    ].contains(dayI.weekday)
+                                                      ? Colors.red
+                                                      : null),
+                                ),
+                                widget.bottomLabelBuilder?.call(dayI) ??
+                                    SizedBox()
+                              ],
                             ),
-                            widget.bottomLabelBuilder?.call(dayI) ?? SizedBox()
-                          ],
+                          ),
                         ),
                       );
                     },
