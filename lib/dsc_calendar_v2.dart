@@ -132,63 +132,6 @@ class _DscCalendarV2State extends State<DscCalendarV2> {
                 ),
               ],
             );
-            var actualDays = DateTime(day.year, day.month + 1, day.day)
-                .difference(day)
-                .inDays;
-            var beginWeekDayIndex = day.weekday - 1;
-            var endDateOffsetToSunDay = 7 -
-                DateTime(day.year, day.month + 1, day.day)
-                    .add(Duration(days: -1))
-                    .weekday;
-
-            var count = endDateOffsetToSunDay + beginWeekDayIndex > 7 &&
-                    DateTime(day.year, day.month + 1, day.day).weekday != 1
-                ? 42
-                : 35;
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  alignment: Alignment.centerLeft,
-                  color: Colors.grey[200],
-                  height: 30,
-                  width: 999,
-                  child: Text(
-                    '   ${day.year}年${day.month}月',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                SizedBox(
-                  height: 300 / 42 * count,
-                  child: GridView.builder(
-                    physics: NeverScrollableScrollPhysics(),
-                    // shrinkWrap: true,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 7,
-                    ),
-                    itemCount: count,
-                    itemBuilder: (BuildContext context, int index) {
-                      if (index < beginWeekDayIndex) {
-                        return SizedBox();
-                      }
-                      var daysOffset = index - beginWeekDayIndex;
-                      if (daysOffset >= actualDays) {
-                        return SizedBox();
-                      }
-                      var dayI = day.add(Duration(days: daysOffset));
-
-                      var disabled = dayI.isAfter(widget.endDate) ||
-                          dayI.isBefore(widget.beginDate);
-                      var isSameDate = dayI.year == daySelected?.year &&
-                          dayI.month == daySelected?.month &&
-                          dayI.day == daySelected?.day;
-                      return _buildDayButton(dayI, context);
-                    },
-                  ),
-                ),
-              ],
-            );
           }),
               // childCount:
               //     (max(1, widget.endDate.year - widget.beginDate.year)) * 12,
