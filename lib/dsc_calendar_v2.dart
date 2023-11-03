@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 // import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
-class DscCalendar extends StatefulWidget {
-  const DscCalendar(
+class DscCalendarV2 extends StatefulWidget {
+  const DscCalendarV2(
       {super.key,
       required this.beginDate,
       required this.endDate,
@@ -20,10 +20,10 @@ class DscCalendar extends StatefulWidget {
   final DateTime? daySelected;
   final TextStyle? daySelectedStyle;
   @override
-  _DscCalendarState createState() => _DscCalendarState();
+  _DscCalendarV2State createState() => _DscCalendarV2State();
 }
 
-class _DscCalendarState extends State<DscCalendar> {
+class _DscCalendarV2State extends State<DscCalendarV2> {
   List<DateTime> monthFirstDays = [];
   @override
   void initState() {
@@ -84,8 +84,54 @@ class _DscCalendarState extends State<DscCalendar> {
         )),
         SliverList(
           delegate: SliverChildBuilderDelegate(((context, index) {
-            var day = DateTime(
-                widget.beginDate.year, widget.beginDate.month + index, 1);
+            var day1 =
+                DateTime(widget.beginDate.year, widget.beginDate.month, 1);
+            var day = day1.add(Duration(days: index * 7));
+            var daysInWeek = List.generate(7,
+                (index) => day.add(Duration(days: -(day.weekday - 1) + index)));
+            for (var i = 0; i < 7; i++) {
+              if (daysInWeek[i].day == 1 && i > 0) {
+                return Column(
+                  children: [
+                    if (daysInWeek[0].isAfter(day1))
+                      Row(
+                        children: [
+                          ...List.generate(
+                              7,
+                              (index) => Expanded(
+                                  child: index < i
+                                      ? _buildDayButton(
+                                          daysInWeek[index], context)
+                                      : SizedBox())),
+                        ],
+                      ),
+                    _buildMonthName(daysInWeek, i),
+                    Row(
+                      children: [
+                        ...List.generate(
+                            7,
+                            (index) => Expanded(
+                                child: index < i
+                                    ? SizedBox()
+                                    : _buildDayButton(
+                                        daysInWeek[index], context)))
+                      ],
+                    ),
+                  ],
+                );
+              }
+            }
+            return Column(
+              children: [
+                if (daysInWeek[0].day == 1) _buildMonthName(daysInWeek, 0),
+                Row(
+                  children: [
+                    ...daysInWeek.map(
+                        (e) => Expanded(child: _buildDayButton(e, context)))
+                  ],
+                ),
+              ],
+            );
             var actualDays = DateTime(day.year, day.month + 1, day.day)
                 .difference(day)
                 .inDays;
@@ -137,66 +183,91 @@ class _DscCalendarState extends State<DscCalendar> {
                       var isSameDate = dayI.year == daySelected?.year &&
                           dayI.month == daySelected?.month &&
                           dayI.day == daySelected?.day;
-                      return IconButton(
-                        onPressed: disabled
-                            ? null
-                            : () {
-                                widget.onDateSelected(dayI);
-                                setState(() {
-                                  daySelected = dayI;
-                                });
-                              },
-                        icon: Container(
-                          padding: const EdgeInsets.all(3.0),
-                          decoration: BoxDecoration(
-                              border: Border.all(
-                                  color: isSameDate
-                                      ? Theme.of(context).primaryColor
-                                      : Colors.transparent),
-                              borderRadius: BorderRadius.circular(9999)),
-                          child: AspectRatio(
-                            aspectRatio: 1,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  '${dayI.day}',
-                                  style: isSameDate &&
-                                          widget.daySelectedStyle != null
-                                      ? widget.daySelectedStyle
-                                      : TextStyle(
-                                          fontSize: isSameDate ? 17 : null,
-                                          fontWeight: FontWeight.bold,
-                                          color: disabled
-                                              ? Colors.grey
-                                              : isSameDate
-                                                  ? Theme.of(context)
-                                                      .primaryColor
-                                                  : [
-                                                      6,
-                                                      7
-                                                    ].contains(dayI.weekday)
-                                                      ? Colors.red
-                                                      : null),
-                                ),
-                                widget.bottomLabelBuilder?.call(dayI) ??
-                                    SizedBox()
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
+                      return _buildDayButton(dayI, context);
                     },
                   ),
                 ),
               ],
             );
           }),
-              childCount:
-                  (max(1, widget.endDate.year - widget.beginDate.year)) * 12,
+              // childCount:
+              //     (max(1, widget.endDate.year - widget.beginDate.year)) * 12,
               addAutomaticKeepAlives: true),
         )
       ],
     );
+  }
+
+  IconButton _buildDayButton(DateTime dayI, BuildContext context) {
+    var disabled =
+        dayI.isAfter(widget.endDate) || dayI.isBefore(widget.beginDate);
+    var isSameDate = dayI.year == daySelected?.year &&
+        dayI.month == daySelected?.month &&
+        dayI.day == daySelected?.day;
+    return IconButton(
+      padding: EdgeInsets.zero,
+      onPressed: disabled
+          ? null
+          : () {
+              widget.onDateSelected(dayI);
+              setState(() {
+                daySelected = dayI;
+              });
+            },
+      icon: AspectRatio(
+        aspectRatio: 1,
+        child: Container(
+          padding: const EdgeInsets.all(3.0),
+          decoration: BoxDecoration(
+              border: Border.all(
+                  color: isSameDate
+                      ? Theme.of(context).primaryColor
+                      : Colors.transparent),
+              borderRadius: BorderRadius.circular(9999)),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                '${dayI.day}',
+                style: isSameDate && widget.daySelectedStyle != null
+                    ? widget.daySelectedStyle
+                    : TextStyle(
+                        fontSize: isSameDate ? 17 : null,
+                        fontWeight: FontWeight.bold,
+                        color: disabled
+                            ? Colors.grey
+                            : isSameDate
+                                ? Theme.of(context).primaryColor
+                                : [6, 7].contains(dayI.weekday)
+                                    ? Colors.red
+                                    : null),
+              ),
+              widget.bottomLabelBuilder?.call(dayI) ?? SizedBox()
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Container _buildMonthName(List<DateTime> daysInWeek, int i) {
+    return Container(
+      alignment: Alignment.centerLeft,
+      color: Colors.grey[200],
+      height: 30,
+      width: 999,
+      child: Text(
+        '   ${daysInWeek[i].year}年${daysInWeek[i].month}月',
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+  Center _buildDay(DateTime e) {
+    return Center(
+        child: Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Text('${e.day}'),
+    ));
   }
 }
